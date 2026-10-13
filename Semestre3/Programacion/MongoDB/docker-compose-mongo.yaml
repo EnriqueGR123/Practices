@@ -3,6 +3,7 @@ services:
   mongodb:
     image: mongo:latest
     container_name: mongodb_container
+    command: ["--auth"]
     restart: always
     ports:
       - "27017:27017" # Puerto estándar de MongoDB
@@ -17,6 +18,7 @@ services:
   mongo-express:
     image: mongo-express:latest
     container_name: mongo_express_container
+    command: ["--auth"]
     restart: always
     ports:
       - "8082:8081" # Accedes en tu navegador vía http://localhost:8081
