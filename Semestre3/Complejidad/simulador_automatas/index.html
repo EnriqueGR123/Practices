@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101827">
+  <title>Simulador de Autómatas Finitos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow"><span class="eyebrow-dot"></span> LABORATORIO DE TEORÍA DE LA COMPUTACIÓN</div>
+      <h1>Simulador de <span>Autómatas Finitos</span></h1>
+      <p>Explora estados, transiciones y lenguajes regulares. Escribe una cadena y observa cómo se procesa, símbolo por símbolo.</p>
+      <div class="hero-tags"><span>HTML · CSS · JavaScript</span><span>Interactivo</span><span>Sin dependencias</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="tabs" aria-label="Tipo de autómata">
+      <button class="tab active" data-tab="afd" aria-selected="true"><span class="tab-icon">D</span> AFD <small>Determinista</small></button>
+      <button class="tab" data-tab="afnd" aria-selected="false"><span class="tab-icon">N</span> AFND <small>No determinista</small></button>
+    </nav>
+
+    <section class="intro-panel panel">
+      <div class="intro-mark" id="intro-mark">D</div>
+      <div><div class="section-kicker" id="type-kicker">AUTÓMATA FINITO DETERMINISTA</div>
+        <h2 id="intro-title">Una ruta para cada símbolo</h2>
+        <p id="intro-copy">Desde cada estado existe exactamente una transición para cada símbolo del alfabeto. El recorrido es único y fácil de seguir.</p>
+      </div>
+      <div class="language-chip"><span>Lenguaje</span><strong id="language-label">Termina en 1</strong></div>
+    </section>
+
+    <section class="workspace">
+      <div class="panel diagram-panel">
+        <div class="panel-heading">
+          <div><div class="section-kicker">VISUALIZACIÓN EN VIVO</div><h2>Diagrama de estados</h2></div>
+          <span class="live-pill"><span></span> EN VIVO</span>
+        </div>
+        <div class="diagram-wrap">
+          <svg id="automaton-svg" viewBox="0 0 620 280" role="img" aria-label="Diagrama del autómata"></svg>
+        </div>
+        <div class="legend">
+          <span><i class="legend-dot initial"></i> Estado inicial</span>
+          <span><i class="legend-dot accepting"></i> Estado de aceptación</span>
+          <span><i class="legend-dot current"></i> Estado activo</span>
+        </div>
+        <div class="diagram-note" id="diagram-note">La flecha indica dónde comienza el procesamiento. El doble círculo identifica el estado final.</div>
+      </div>
+
+      <div class="panel control-panel">
+        <div class="panel-heading">
+          <div><div class="section-kicker">ZONA DE PRUEBAS</div><h2>Simular una cadena</h2></div>
+        </div>
+        <label for="example-select">Ejemplo predeterminado</label>
+        <select id="example-select">
+          <option value="example">Ejemplos del autómata</option>
+          <option value="empty">Cadena vacía (ε)</option>
+          <option value="accept">Cadena aceptada</option>
+          <option value="reject">Cadena rechazada</option>
+          <option value="custom">Cadena personalizada</option>
+        </select>
+        <label for="input-string">Cadena de entrada <span class="label-hint">Alfabeto: {0, 1}</span></label>
+        <div class="input-row">
+          <input id="input-string" type="text" value="1011" autocomplete="off" spellcheck="false" aria-describedby="input-help">
+          <button class="primary-btn" id="start-btn">Iniciar <span>→</span></button>
+        </div>
+        <p class="help-text" id="input-help">Escribe solo 0 y 1. Puedes dejar el campo vacío para probar ε.</p>
+        <div class="control-buttons">
+          <button id="step-btn" class="secondary-btn" disabled><span>▸</span> Siguiente paso</button>
+          <button id="play-btn" class="secondary-btn" disabled><span>▶</span> Reproducir</button>
+          <button id="reset-btn" class="ghost-btn"><span>↺</span> Reiniciar</button>
+        </div>
+        <div class="speed-row"><label for="speed">Velocidad de reproducción</label><div class="speed-control"><input id="speed" type="range" min="250" max="1500" step="250" value="750"><span id="speed-label">Normal</span></div></div>
+        <div class="result-box neutral" id="result-box" role="status" aria-live="polite">
+          <div class="result-symbol" id="result-symbol">i</div>
+          <div><strong id="result-title">Listo para simular</strong><p id="result-copy">Pulsa “Iniciar” para preparar el recorrido.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel transition-panel">
+      <div class="panel-heading">
+        <div><div class="section-kicker">FUNCIÓN DE TRANSICIÓN</div><h2>Tabla de transiciones</h2></div>
+        <span class="small-caption" id="table-caption">δ (estado, símbolo) → estado</span>
+      </div>
+      <div class="table-scroll"><table id="transition-table"></table></div>
+      <p class="table-footnote" id="table-footnote">Cada celda indica el estado al que se llega al leer el símbolo de su columna.</p>
+    </section>
+
+    <section class="panel trace-panel">
+      <div class="panel-heading">
+        <div><div class="section-kicker">TRAZA DE EJECUCIÓN</div><h2>Historial de pasos</h2></div>
+        <span class="step-counter" id="step-counter">0 pasos</span>
+      </div>
+      <div class="trace-empty" id="trace-empty"><span class="trace-empty-icon">↳</span><div><strong>El recorrido aparecerá aquí</strong><p>Inicia una simulación para ver los símbolos procesados y los estados alcanzados.</p></div></div>
+      <div class="trace-list" id="trace-list"></div>
+    </section>
+
+    <section class="comparison-section">
+      <div class="section-kicker">APRENDE COMPARANDO</div>
+      <h2>AFD vs. AFND</h2>
+      <p class="comparison-lead">Ambos reconocen lenguajes regulares, pero representan el procesamiento de formas distintas.</p>
+      <div class="comparison-grid">
+        <article class="compare-card afd-card"><div class="compare-title"><span class="tab-icon">D</span><h3>AFD</h3><span class="compare-tag">Una ruta</span></div><p>Para cada estado y símbolo existe exactamente una transición. El estado actual siempre es único.</p><ul><li><b>Procesamiento:</b> una transición por símbolo.</li><li><b>Aceptación:</b> termina en un estado final.</li><li><b>Recorrido:</b> único, sin bifurcaciones.</li></ul></article>
+        <article class="compare-card afnd-card"><div class="compare-title"><span class="tab-icon">N</span><h3>AFND</h3><span class="compare-tag">Varias rutas</span></div><p>Un símbolo puede llevar a cero, uno o varios estados. Las transiciones ε permiten cambiar de estado sin consumir entrada.</p><ul><li><b>Procesamiento:</b> conjunto de estados activos.</li><li><b>Aceptación:</b> al menos una ruta acaba en un estado final.</li><li><b>Recorrido:</b> puede ramificarse en alternativas.</li></ul></article>
+      </div>
+      <div class="insight"><span>✦</span><p><strong>¿Qué significa no determinismo?</strong> El AFND no “adivina” al azar: se consideran todas las rutas posibles en paralelo. Aunque su representación es diferente, todo AFND puede convertirse en un AFD equivalente y ambos reconocen exactamente los lenguajes regulares.</p></div>
+    </section>
+    <footer><span>SIMULADOR EDUCATIVO</span><span>Hecho con HTML, CSS y JavaScript puro</span></footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+[
+    {
+        "id": 2,
+        "nombre": "Luis Pérez",
+        "email": "luis.perez@udg.mx",
+        "carrera": "Ingeniería en Inteligencia Artificial",
+        "semestre": 5
+    },
+    {
+        "id": 3,
+        "nombre": "juan",
+        "email": "string@gmail.com",
+        "carrera": "ia",
+        "semestre": 3
+    },
+    {
+        "id": 4,
+        "nombre": "Juan Pérez Garcí",
+        "email": "Juan@udg.mx",
+        "carrera": "Ingenierío",
+        "semestre": 3
+    }
+]
