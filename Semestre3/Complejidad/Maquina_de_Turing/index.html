@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <title>Máquina de Turing | (a+b)²</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow"><span class="status-dot"></span> LABORATORIO DE COMPUTACIÓN TEÓRICA</div>
+      <h1>Simulador de Máquina de Turing</h1>
+      <p class="subtitle">Evaluación de <strong>(a + b)²</strong> mediante operaciones binarias.</p>
+      <div class="formula">(a + b)² = (a + b) × (a + b)</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel" aria-labelledby="input-title">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">01 / CONFIGURACIÓN</span>
+          <h2 id="input-title">Define los operandos</h2>
+        </div>
+        <span class="tag">Base 2</span>
+      </div>
+
+      <form id="input-form" novalidate>
+        <div class="input-grid">
+          <label class="field">
+            <span>Operando a</span>
+            <input id="input-a" name="a" type="text" value="10"
+              inputmode="numeric" autocomplete="off" spellcheck="false"
+              maxlength="64" placeholder="Ej. 10" aria-describedby="hint-a">
+            <small id="hint-a">Solo se admiten 0 y 1.</small>
+          </label>
+          <label class="field">
+            <span>Operando b</span>
+            <input id="input-b" name="b" type="text" value="11"
+              inputmode="numeric" autocomplete="off" spellcheck="false"
+              maxlength="64" placeholder="Ej. 11" aria-describedby="hint-b">
+            <small id="hint-b">Solo se admiten 0 y 1.</small>
+          </label>
+        </div>
+        <div id="validation" class="validation" role="alert" aria-live="polite"></div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit" id="start-btn">
+            ▶ Iniciar simulación
+          </button>
+          <button class="btn btn-secondary" type="button" id="example-btn">
+            Cargar ejemplo
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="machine-title">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">02 / EJECUCIÓN</span>
+          <h2 id="machine-title">Centro de control</h2>
+        </div>
+        <span id="machine-status" class="tag tag-idle">Sin iniciar</span>
+      </div>
+
+      <div class="state-grid">
+        <div class="metric">
+          <span>Estado actual</span>
+          <strong id="current-state">q₀</strong>
+        </div>
+        <div class="metric">
+          <span>Transición</span>
+          <strong id="step-count">0</strong>
+        </div>
+        <div class="metric">
+          <span>Fase</span>
+          <strong id="current-phase">Preparación</strong>
+        </div>
+      </div>
+
+      <div class="progress-label">
+        <span>Progreso de ejecución</span>
+        <span id="progress-text">0 pasos</span>
+      </div>
+      <div class="progress-track">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+
+      <div class="controls">
+        <button id="next-btn" class="btn btn-primary" type="button" disabled>
+          Paso siguiente →
+        </button>
+        <button id="auto-btn" class="btn btn-secondary" type="button" disabled>
+          ▶ Automático
+        </button>
+        <button id="reset-btn" class="btn btn-danger" type="button">
+          ↺ Reiniciar
+        </button>
+      </div>
+
+      <div class="speed-control">
+        <label for="speed">Velocidad automática</label>
+        <input id="speed" type="range" min="100" max="1200"
+          value="500" step="100">
+        <output id="speed-value" for="speed">500 ms</output>
+      </div>
+
+      <div class="machine-note">
+        Cada paso ejecuta una transición de la máquina. Las cintas usan
+        índices binarios con el bit menos significativo en la posición 0.
+        El extremo de las cintas se amplía cuando se necesita.
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="tapes-title">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">03 / MEMORIA DE TRABAJO</span>
+          <h2 id="tapes-title">Cintas de la máquina</h2>
+        </div>
+        <span class="tag">5 cintas</span>
+      </div>
+
+      <p class="muted">
+        La flecha marca el cabezal de cada cinta. La celda resaltada es la
+        posición que utiliza la transición actual.
+      </p>
+      <div id="tapes" class="tapes">
+        <p class="empty-state">Inicia una simulación para visualizar las cintas.</p>
+      </div>
+      <div class="legend">
+        <span><i class="legend-active"></i> Celda activa</span>
+        <span><i class="legend-head"></i> Cabezal</span>
+        <span><i class="legend-written"></i> Escritura reciente</span>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="transition-title">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">04 / FUNCIÓN DE TRANSICIÓN</span>
+          <h2 id="transition-title">Última transición</h2>
+        </div>
+      </div>
+      <div id="transition-detail" class="transition-card" aria-live="polite">
+        <p>Esperando el inicio de la máquina.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Estado previo</th>
+              <th>Lectura</th>
+              <th>Escritura</th>
+              <th>Movimiento</th>
+              <th>Estado siguiente</th>
+            </tr>
+          </thead>
+          <tbody id="transition-row">
+            <tr><td colspan="5" class="muted">Sin transiciones registradas.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="result-title">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">05 / RESULTADO</span>
+          <h2 id="result-title">Resultado del cálculo</h2>
+        </div>
+      </div>
+      <div class="result-grid">
+        <div class="result-card">
+          <span>Suma a + b</span>
+          <strong id="sum-result">—</strong>
+          <small id="sum-decimal">Decimal: —</small>
+        </div>
+        <div class="result-card result-highlight">
+          <span>Cuadrado (a + b)²</span>
+          <strong id="final-result">—</strong>
+          <small id="final-decimal">Decimal: —</small>
+        </div>
+      </div>
+      <div id="completion-message" class="completion-message" aria-live="polite">
+        El resultado aparecerá cuando la máquina alcance el estado HALT.
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="log-title">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">06 / TRAZABILIDAD</span>
+          <h2 id="log-title">Registro de transiciones</h2>
+        </div>
+        <span id="log-count" class="tag">0 registros</span>
+      </div>
+      <div class="log-toolbar">
+        <p class="muted">Las transiciones más recientes aparecen primero.</p>
+        <button id="clear-log-btn" type="button" class="btn btn-small btn-secondary">
+          Limpiar vista
+        </button>
+      </div>
+      <ol id="transition-log" class="transition-log">
+        <li class="empty-state">El registro está vacío.</li>
+      </ol>
+    </section>
+
+    <section class="panel" aria-labelledby="theory-title">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">07 / FUNDAMENTOS</span>
+          <h2 id="theory-title">Guía académica</h2>
+        </div>
+      </div>
+
+      <details open>
+        <summary>¿Qué es una máquina de Turing?</summary>
+        <p>
+          Es un modelo matemático de computación formado por una cinta de
+          memoria, uno o más cabezales, un conjunto de estados y reglas que
+          determinan qué símbolo leer, qué escribir, cómo moverse y a qué
+          estado pasar.
+        </p>
+      </details>
+
+      <details>
+        <summary>¿Qué representan las cintas y los cabezales?</summary>
+        <p>
+          Las cintas almacenan símbolos del alfabeto. Los cabezales señalan
+          las celdas utilizadas en cada transición. En esta máquina de varias
+          cintas se separan los operandos, la suma, el producto acumulado y
+          el producto parcial. La cinta se expande al acceder a posiciones
+          nuevas.
+        </p>
+      </details>
+
+      <details>
+        <summary>¿Cómo se suma en binario?</summary>
+        <p>
+          Se recorren los bits desde la derecha. Para cada posición se
+          consideran los bits de ambos operandos y el acarreo anterior.
+          La suma de tres bits se representa mediante un bit de resultado
+          y un nuevo acarreo. Por ejemplo, 1 + 1 = 10 en binario.
+        </p>
+      </details>
+
+      <details>
+        <summary>¿Cómo se multiplica en binario?</summary>
+        <p>
+          Se procesa cada bit del multiplicador. Un bit 0 produce un producto
+          parcial nulo; un bit 1 copia el multiplicando. Cada producto
+          parcial se desplaza según su posición y se suma al acumulador.
+          La suma utiliza reglas de bits y acarreo.
+        </p>
+      </details>
+
+      <details>
+        <summary>¿Por qué se eleva al cuadrado multiplicando por sí mismo?</summary>
+        <p>
+          Por definición, x² = x × x. Primero se calcula s = a + b y después
+          se calcula s × s. Por ejemplo: a = 10₂ y b = 11₂; la suma es
+          101₂ y su cuadrado es 11001₂, que equivale a 25 en decimal.
+        </p>
+      </details>
+
+      <details>
+        <summary>Estados, aceptación y límites del modelo</summary>
+        <p>
+          Los estados identifican la fase y la operación en curso. HALT es
+          el estado de aceptación: se alcanza únicamente cuando se han
+          procesado todos los bits y se ha terminado la multiplicación.
+          Un límite de pasos evita ejecuciones excesivamente largas.
+        </p>
+        <p>
+          Este proyecto es una máquina de Turing de varias cintas a nivel
+          de microprograma educativo. Cada transición actualiza símbolos,
+          cabezales y estado, pero algunas rutinas se representan mediante
+          subestados especializados. No pretende ser una tabla mínima
+          universal de una sola cinta.
+        </p>
+      </details>
+
+      <div class="example-box">
+        <strong>Ejemplo resuelto</strong>
+        <p>
+          a = 10₂ = 2₁₀<br>
+          b = 11₂ = 3₁₀<br>
+          a + b = 101₂ = 5₁₀<br>
+          (a + b)² = 11001₂ = 25₁₀
+        </p>
+        <button id="load-example-bottom" class="btn btn-secondary" type="button">
+          Cargar este ejemplo
+        </button>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Simulador educativo · HTML5, CSS3 y JavaScript puro
+      <br>Modelo de varias cintas con transiciones visibles.
+    </footer>
+  </main>
+</body>
+</html>
